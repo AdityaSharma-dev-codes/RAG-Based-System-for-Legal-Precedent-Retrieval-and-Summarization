@@ -89,8 +89,8 @@ for year in os.listdir(base_dir):
                     count += 1
                 else:
                     pass
-                    # os.remove(pdf_path)
-                    # print(f"deleted file {pdf_path} from {year}")
+                    os.remove(pdf_path)
+                    print(f"deleted file {pdf_path} from {year}")
 
             except Exception as e:
                 print(f"Error reading file{file}: {e}")
