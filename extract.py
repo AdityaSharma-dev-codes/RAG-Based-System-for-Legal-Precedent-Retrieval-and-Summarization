@@ -6,42 +6,46 @@ import re
 count = 0
 base_dir = "DataSet"
 
-def clean_text(text):
+def clean_text(txt):
+    # Remove form feed characters (\f)
+    txt = txt.replace('\f', '')
+
     # Remove URLs
-    text = re.sub(r'http\S+', '', text)
+    txt = re.sub(r'http\S+', '', txt)
 
     # Remove excessive newlines
-    text = re.sub(r'\n+', '\n', text)
+    txt = re.sub(r'\n+', '\n', txt)
 
-    # Remove citations (AIR, SCC etc.)
-    text = re.sub(r'\bAIR\b.*?\n', '', text)
-    text = re.sub(r'\b\d{4}.*?SCC.*?\n', '', text)
+    # Remove citations (AIR, SCC, etc.)
+    txt = re.sub(r'\bAIR\b.*?\n', '', txt)
+    txt = re.sub(r'\b\d{4}.*?SCC.*?\n', '', txt)
 
     # Remove "Indian Kanoon" lines
-    text = re.sub(r'Indian Kanoon.*?\n', '', text)
+    txt = re.sub(r'Indian Kanoon.*?\n', '', txt)
 
     # Remove page numbers
-    text = re.sub(r'\n\d+\n', '\n', text)
+    txt = re.sub(r'\n\d+\n', '\n', txt)
 
     # Remove extra spaces
-    text = re.sub(r' +', ' ', text)
+    txt = re.sub(r' +', ' ', txt)
 
-    return text.strip()
+    return txt.strip()
 
 
-def extract_structure(text):
+def extract_structure(txt):
     data = {}
 
     # Case Title (first line)
-    lines = text.split("\n")
+    lines = txt.split("\n")
     data["title"] = lines[0] if lines else ""
 
     # Extract judgment section
-    judgment_match = re.search(r'JUDGMENT:(.*)', text, re.DOTALL)
-    data["judgment"] = judgment_match.group(1).strip() if judgment_match else text[:2000]
+    # Search for JUDGMENT or ORDER, optionally followed by a colon and whitespace
+    judgment_match = re.search(r'\b(?:JUDGMENT|ORDER)\b[:\s]*(.*)', txt, re.DOTALL | re.IGNORECASE)
+    data["judgment"] = judgment_match.group(1).strip() if judgment_match else txt[:2000]
 
     # Extract IPC Sections
-    ipc_sections = re.findall(r'Section\s+\d+\s+I\.?P\.?C', text)
+    ipc_sections = re.findall(r'Section\s+\d+\s+I\.?P\.?C', txt, re.IGNORECASE)
     data["ipc_sections"] = list(set(ipc_sections))
 
     return data
@@ -66,6 +70,7 @@ def is_criminal_case(txt):
 
     return False
 
+results = []
 for year in os.listdir(base_dir):
     y_path = os.path.join(base_dir, year)
 
@@ -77,22 +82,24 @@ for year in os.listdir(base_dir):
                 text = extract_text(pdf_path)
 
                 if is_criminal_case(text):
-                    print(f"{year} criminal")
+                    print(f"file {pdf_path} from {year} is about a criminal case")
 
                     clean = clean_text(text)
                     structured = extract_structure(clean)
 
-                    with open("criminal_cases.json", "a", encoding="utf-8") as f:
-                        json.dump(structured, f)
-                        f.write("\n")
-
+                    results.append(structured)
                     count += 1
                 else:
-                    pass
+                    # run the next 2 lines only for the first run
                     os.remove(pdf_path)
                     print(f"deleted file {pdf_path} from {year}")
-
+                    pass
+                
             except Exception as e:
-                print(f"Error reading file{file}: {e}")
+                print(f"Error reading file {file}: {e}")
+
+# Write the final results as a pretty-printed JSON array
+with open("criminal_cases.json", "w", encoding="utf-8") as f:
+    json.dump(results, f, indent=4, ensure_ascii=False)
 
 print(f"Number of Files of criminal cases: {count}")
