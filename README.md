@@ -1,4 +1,4 @@
-# ILPM: RAG-Based Legal Precedent Retrieval & Summarization
+# RAG-Based System for Legal Precedent Retrieval and Summarization
 
 ### IMPORTANT
 > **Work in Progress:** This project is under active development and some features may be incomplete or unstable.  
@@ -24,6 +24,7 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 - `DataSet/`: Organized by year (2000-2025), containing Supreme Court case PDFs.
 - `extract.py`: Script to extract text from PDFs and classify criminal cases based on keywords.
 - `LICENSE`: MIT License.
+- `Criminal_cases.json`: Extracted Text from DataSet
 
 ### Installation
 
