@@ -2,12 +2,9 @@ import json
 import re
 
 def clean_ipc_section(section):
-    """
-    Normalizes IPC section strings.
-    Example: 'Section 302 I.P.C' -> 'Section 302 IPC'
-    """
+    # Normalizes IPC section strings.
+    # Example: 'Section 302 I.P.C' -> 'Section 302 IPC'
     # Standardize to "Section {Code} IPC"
-    # Match the code part (digits, letters, hyphens, slashes)
     m = re.search(r'(\d+[A-Z\-/]*\d*[A-Z]*)', section)
     if m:
         code = m.group(1).strip('-/ ').upper()
@@ -15,57 +12,73 @@ def clean_ipc_section(section):
     return section
 
 def extract_ipc_from_text(text):
-    """
-    Attempts to extract more IPC sections from the judgment text.
-    """
     if not text:
         return []
         
     ipc_pattern = r'I\.?P\.?C|Indian\s+Penal\s+Code'
-    section_prefix = r'(?:Sections?|u/s|u/ss|u\.s\.|U/s|U\.S\.|under\s+Sections?)'
+    section_prefix = r'(?:Sections?|u/s|u/ss|u\.s\.|U/s|U\.S\.|under\s+Sections?|under\s+)'
     
     found = set()
     # Normalize space for searching
     search_text = re.sub(r'\s+', ' ', text)
 
-    # 1. Matches like "Section 302 IPC", "Section 302 of IPC", "Section 302 of the Indian Penal Code"
+    # 1. Matches with IPC nearby (High Confidence)
     pattern1 = rf'{section_prefix}\s+([A-Z\d,\s/&\-and]+?)(?:\s+of\s+)?(?:\s+the\s+)?(?:{ipc_pattern})'
     for m in re.finditer(pattern1, search_text, re.IGNORECASE):
         raw_sections = m.group(1)
-        # Match potential section numbers/codes
         potential_sections = re.findall(r'\b\d+[A-Z\-/]*\d*[A-Z]*\b', raw_sections)
         for s in potential_sections:
             s = s.strip('-/ ')
             if s:
                 if '/' in s:
                     for part in s.split('/'):
-                        if part.strip():
-                            found.add(f"Section {part.strip().upper()} IPC")
+                        p = part.strip().upper()
+                        if p: found.add(f"Section {p} IPC")
                 else:
                     found.add(f"Section {s.upper()} IPC")
 
-    # 2. Matches like "IPC Section 302"
+    # 2. Matches like "IPC Section 302" (High Confidence)
     pattern2 = rf'(?:{ipc_pattern})\s+{section_prefix}?\s*([A-Z\d,\s/&\-and]+)'
     for m in re.finditer(pattern2, search_text, re.IGNORECASE):
         raw_sections = m.group(1)
         potential_sections = re.findall(r'\b\d+[A-Z\-/]*\d*[A-Z]*\b', raw_sections)
-        # Limit to the first few to avoid consuming unrelated text after IPC mention
         for s in potential_sections[:5]:
             s = s.strip('-/ ')
             if s:
                 if '/' in s:
                     for part in s.split('/'):
-                        if part.strip():
-                            found.add(f"Section {part.strip().upper()} IPC")
+                        p = part.strip().upper()
+                        if p: found.add(f"Section {p} IPC")
                 else:
                     found.add(f"Section {s.upper()} IPC")
                     
+    # 3. extraction with range filtering (Medium Confidence)
+    # IPC sections are between 1 and 511.
+    pattern3 = rf'({section_prefix})\s*([A-Z\d,\s/&\-and]+)'
+    for m in re.finditer(pattern3, search_text, re.IGNORECASE):
+        raw_sections = m.group(2)
+        # Limit to the first part to avoid long matches
+        first_part = raw_sections.split(' ')[0].strip(',')
+        potential_sections = re.findall(r'\b\d+[A-Z\-/]*\d*[A-Z]*\b', first_part)
+        for s in potential_sections:
+            s = s.strip('-/ ')
+            if s:
+                # Check if it looks like a valid IPC section
+                num_m = re.search(r'\d+', s)
+                if num_m:
+                    num = int(num_m.group())
+                    if 1 <= num <= 511:
+                        if '/' in s:
+                            for part in s.split('/'):
+                                p = part.strip().upper()
+                                if p: found.add(f"Section {p} IPC")
+                        else:
+                            found.add(f"Section {s.upper()} IPC")
+                
     return list(found)
 
 def clean_judgment(text):
-    """
-    Cleans judgment text: removes boilerplate, normalizes line wraps and whitespace.
-    """
+    # Cleans judgment text: removes boilerplate, normalizes line wraps and whitespace.
     if not text:
         return ""
         
@@ -92,7 +105,6 @@ def clean_judgment(text):
     text = re.sub(r' +', ' ', text)
     
     # Identify hard wraps: a newline NOT preceded by sentence-ending punctuation is likely a wrap.
-    # We replace it with a space.
     text = re.sub(r'([^\.\!\?\:\;])\n', r'\1 ', text)
     
     # Replace remaining newlines with spaces for a single clean paragraph
@@ -104,13 +116,14 @@ def clean_judgment(text):
     return text
 
 def clean_item(item):
-    """
-    Cleans title, judgment, and ipc_sections in a case item.
-    """
+    # Cleans title, judgment, and ipc_sections in a case item.
     # Clean Title
+
     title = item.get("title", "")
     title = re.sub(r'\s+', ' ', title).strip()
-    # Remove things like "on 24 November, 2006" at the end of titles
+
+    # Remove dates like "on 24 November, 2006" at the end of titles
+
     title = re.sub(r'\s+on\s+\d+.*?$', '', title, flags=re.IGNORECASE)
     title = re.sub(r'\s+on$', '', title, flags=re.IGNORECASE)
     title = re.sub(r',$', '', title).strip()
@@ -150,7 +163,7 @@ def main():
     # Apply cleaning to each item
     cleaned_data = [clean_item(item) for item in data]
     
-    # Deduplicate items based on title and judgment
+    # remove duplicate items
     unique_items = []
     seen = set()
     for item in cleaned_data:
@@ -161,7 +174,7 @@ def main():
             seen.add(identifier)
     
     # Write the cleaned data back
-    with open(output_file, "w", encoding="utf-7") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(unique_items, f, indent=4, ensure_ascii=False)
     
     print(f"Cleaned JSON saved to {output_file}.")
