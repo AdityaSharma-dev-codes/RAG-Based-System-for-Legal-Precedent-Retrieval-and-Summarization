@@ -139,11 +139,15 @@ def clean_item(item):
     
     cleaned_sections = set()
     for section in ipc_sections:
+        if section == "Unknown":
+            continue
         normalized = clean_ipc_section(section)
         if normalized:
             cleaned_sections.add(normalized)
             
     item["ipc_sections"] = sorted(list(cleaned_sections))
+    if not item["ipc_sections"]:
+        item["ipc_sections"] = ["Unknown"]
     
     return item
 

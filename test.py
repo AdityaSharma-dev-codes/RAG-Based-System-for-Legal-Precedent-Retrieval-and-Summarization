@@ -19,7 +19,7 @@ def check(data):
             count[1] += 1
 
     for ipc in data:
-        if ipc["ipc_sections"] == []:
+        if ipc["ipc_sections"] == [] or ipc["ipc_sections"] == ["Unknown"]:
             count[2] += 1
     return count
 
