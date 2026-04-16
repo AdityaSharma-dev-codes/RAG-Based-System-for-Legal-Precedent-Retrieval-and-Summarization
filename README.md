@@ -58,6 +58,9 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
    ```bash
    python test.py
    ```
+   This script performs:
+   - **Missing Data Check**: Counts missing values in `title`, `judgment`, and `ipc_sections` for both original and cleaned datasets.
+   - **Word Count Statistics**: Calculates the average, minimum, and maximum word counts in the `judgment` section to monitor data volume and consistency.
 
 ### Team Members
 - Aditya Sharma (Team Lead)  
