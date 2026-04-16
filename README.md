@@ -67,7 +67,7 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 
 ### Acknowledgements
 
-Dataset: Legal Dataset: [SC Judgments (India, 1950–2024)](https://www.kaggle.com/datasets/adarshsingh0903/legal-dataset-sc-judgments-india-19502024)
+Dataset (Court Cases PDFs): [SC Judgments (India, 1950–2024)](https://www.kaggle.com/datasets/adarshsingh0903/legal-dataset-sc-judgments-india-19502024)
 
 ### License
 
