@@ -26,8 +26,7 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/adityasharma-sc/ILPM.git
-   cd ILPM
+   git clone https://github.com/adityasharma-dev-codes/RAG-Based-System-for-Legal-Precedent-Retrieval-and-Summarization.git
    ```
 
 2. Install dependencies:
