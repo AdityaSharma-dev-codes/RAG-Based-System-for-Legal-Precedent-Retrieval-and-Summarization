@@ -1,9 +1,9 @@
 import json
 
-with open("criminal_cases.json", "r") as f1:
+with open("criminal_cases.json", "r", encoding = "utf-8") as f1:
     data1 = json.load(f1)
 
-with open("Cleaned_criminal_cases.json", "r") as f2:
+with open("Cleaned_criminal_cases.json", "r", encoding = "utf-8") as f2:
     data2 = json.load(f2)
 
 def check_missing(data):
@@ -40,7 +40,7 @@ def check_word_count(data):
     return words_final
 
 print(f"Number of missing Title, Judgment, IPC Sections in criminal_cases.json: {check_missing(data1)}")
-print(f"Criminal_cases.json - Judgment Word Count: {check_word_count(data1)}")
+print(f"Criminal_cases.json - Judgment Word Count(Average, Minimum, Maximum): {check_word_count(data1)}")
 
 print(f"Number of missing Title, Judgment, IPC Sections in Cleaned_criminal_cases.json: {check_missing(data2)}")
-print(f"Cleaned_criminal_cases.json - Judgment Word Count: {check_word_count(data2)}")
+print(f"Cleaned_criminal_cases.json - Judgment Word Count(Average, Minimum, Maximum): {check_word_count(data2)}")
