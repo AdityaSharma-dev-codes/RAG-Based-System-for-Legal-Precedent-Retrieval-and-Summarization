@@ -17,10 +17,13 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 - `DataSet/`: Organized by year (2000-2025), containing Supreme Court case PDFs.
 - `extract.py`: Script to extract text from PDFs and classify criminal cases based on keywords.
 - `clean.py`: Robust script to clean judgment text, standardize IPC sections, and deduplicate cases.
+- `chunk_judgments.py`: Script to divide long judgment texts into manageable chunks for processing.
 - `test.py`: Validation script to verify data quality and track missing information.
+- `test_chunks.py`: Validation script to ensure chunked data meets word count constraints.
 - `LICENSE`: MIT License.
 - `criminal_cases.json`: Initial extracted text from the DataSet.
 - `Cleaned_criminal_cases.json`: Final cleaned and enriched JSON dataset.
+- `Chunked_criminal_cases.json`: Dataset with judgments divided into chunks.
 
 ### Installation
 
@@ -31,7 +34,7 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 
 2. Install dependencies:
    ```bash
-   pip install pymupdf
+   pip install -r requirements.txt 
    ```
 
 ### Usage
@@ -54,13 +57,25 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
    - **Deduplication**: Removes duplicate cases based on title and judgment content.
 <br><br>
 
-3. **Validation**: To check the quality of the dataset:
+3. **Chunking**: To divide judgments into smaller segments:
+   ```bash
+   python chunk_judgments.py
+   ```
+   This script:
+   - **Sentence-based Chunking**: Uses SpaCy's `sentencizer` to group sentences into chunks of up to 300 words.
+   - **Handling Long Judgments**: Successfully processes extremely long texts by increasing SpaCy's `max_length` limit.
+   - **Word Limit Enforcement**: Forcibly splits sentences that exceed the maximum word count to ensure all chunks are within the 300-word limit.
+<br><br>
+
+4. **Validation**: To check the quality of the dataset:
    ```bash
    python test.py
+   python test_chunks.py
    ```
-   This script performs:
-   - **Missing Data Check**: Counts missing values in `title`, `judgment`, and `ipc_sections` for both original and cleaned datasets.
-   - **Word Count Statistics**: Calculates the average, minimum, and maximum word counts in the `judgment` section to monitor data volume and consistency.
+   These scripts perform:
+   - **Missing Data Check (test.py)**: Counts missing values in `title`, `judgment`, and `ipc_sections` for both original and cleaned datasets.
+   - **Word Count Statistics (test.py)**: Calculates the average, minimum, and maximum word counts in the `judgment` section.
+   - **Chunk Validation (test_chunks.py)**: Verifies that no chunk in `Chunked_criminal_cases.json` exceeds the 300-word limit and provides chunk-level statistics.
 
 ### Team Members
 - Aditya Sharma (Team Lead)  

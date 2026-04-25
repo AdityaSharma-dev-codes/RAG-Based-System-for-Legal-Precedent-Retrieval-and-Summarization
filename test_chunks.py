@@ -5,7 +5,6 @@ with open("Chunked_criminal_cases.json", "r", encoding="utf-8") as f1:
 
 def word_count_in_chunk(data):
     count_above_300 = 0
-    count_above_400 = 0
     total_words = 0
     total_chunks = 0
     max_words = 0
@@ -22,9 +21,6 @@ def word_count_in_chunk(data):
             
             if word_count > 300:
                 count_above_300 += 1
-            if word_count > 400:
-                count_above_400 += 1
-                
             if word_count > max_words:
                 max_words = word_count
             if word_count < min_words:
