@@ -82,6 +82,8 @@ def main():
         if judgment:
             chunks = chunk_text(judgment, nlp, max_words=250, overlap=50)
             for chunk in chunks:
+                if len(chunk.split()) < 30:
+                    continue
                 chunked_data.append({
                     "title": case.get("title", "Unknown"),
                     "ipc_sections": case.get("ipc_sections", []),
