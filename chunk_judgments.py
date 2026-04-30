@@ -2,7 +2,7 @@ import json
 import spacy
 import os
 
-def chunk_text(text, nlp, max_words=300):
+def chunk_text(text, nlp, max_words=250, overlap=50):
     if not text:
         return []
 
@@ -10,6 +10,7 @@ def chunk_text(text, nlp, max_words=300):
     chunks = []
     current_chunk = []
     current_word_count = 0
+    overlap_only = False
     
     for sent in doc.sents:
         sent_text = sent.text.strip()
@@ -21,21 +22,33 @@ def chunk_text(text, nlp, max_words=300):
         
         if current_word_count + sent_word_count > max_words:
             if current_chunk:
-                chunks.append(" ".join(current_chunk))
-                current_chunk = []
-                current_word_count = 0
+                chunk_str = " ".join(current_chunk)
+                chunks.append(chunk_str)
+                
+                # Add overlap
+                overlap_words = " ".join(chunk_str.split()[-overlap:])
+                current_chunk = [overlap_words]
+                current_word_count = len(overlap_words.split())
+                overlap_only = True
             
             # If a single sentence is longer than max_words, split it by words
             if sent_word_count > max_words:
-                for i in range(0, sent_word_count, max_words):
+                for i in range(0, sent_word_count, max_words - overlap):
                     chunk = " ".join(sent_words[i:i + max_words])
                     chunks.append(chunk)
+                
+                # Prepare overlap for the next sentence
+                overlap_words = " ".join(sent_words[-overlap:])
+                current_chunk = [overlap_words]
+                current_word_count = len(overlap_words.split())
+                overlap_only = True
                 continue
         
         current_chunk.append(sent_text)
         current_word_count += sent_word_count
+        overlap_only = False
         
-    if current_chunk:
+    if current_chunk and not overlap_only:
         chunks.append(" ".join(current_chunk))
 
     return chunks
@@ -65,14 +78,15 @@ def main():
     print(f"Processing {total_cases} cases...")
     
     for i, case in enumerate(data):
-        judgment = case.pop("judgment", "")
+        judgment = case.get("judgment", "")
         if judgment:
-            chunks = chunk_text(judgment, nlp, max_words=300)
-            case["judgment_chunks"] = chunks
-        else:
-            case["judgment_chunks"] = []
-            
-        chunked_data.append(case)
+            chunks = chunk_text(judgment, nlp, max_words=250, overlap=50)
+            for chunk in chunks:
+                chunked_data.append({
+                    "title": case.get("title", "Unknown"),
+                    "ipc_sections": case.get("ipc_sections", []),
+                    "chunk": chunk,
+                })
             
         if (i + 1) % 100 == 0:
             print(f"Processed {i + 1}/{total_cases} cases...")
