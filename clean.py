@@ -77,7 +77,7 @@ def extract_ipc_from_text(text):
                 
     return list(found)
 
-def clean_judgment(text):
+def clean_judgment(text, title=None):
     # Cleans judgment text: removes boilerplate, normalizes line wraps and whitespace.
     if not text:
         return ""
@@ -94,6 +94,10 @@ def clean_judgment(text):
         if l.upper().startswith('BENCH:'): continue
         if l.upper() == 'JUDGMENT:': continue
         if l.upper() == 'ORDER:': continue
+        
+        # Skip title-only lines
+        if title and l.lower() == title.lower(): continue
+        
         # Skip lines that are just "JUDGMENT" after removing spaces
         if re.match(r'^[JUDGMENT\s]*$', l, re.IGNORECASE) and len(l.replace(' ', '')) == 8: continue
         
@@ -101,6 +105,24 @@ def clean_judgment(text):
     
     text = '\n'.join(cleaned_lines)
     
+    # Remove specific noise patterns
+    # Witness markers: PW1, DW1, (PW1), PW 1, PW-1, PW.1, PWs 1, 2 etc.
+    text = re.sub(r'\(?\b[PDC]Ws?[\s\.\-]*\d+([,\s&/and]*\d+)*\b\)?', ' ', text, flags=re.IGNORECASE)
+    # Exhibit markers: Ex.P-1, Ex. P 1, etc.
+    text = re.sub(r'\bEx[\s\.\-]*[PD][\s\.\-]*\d+([,\s&/and]*\d+)*\b', ' ', text, flags=re.IGNORECASE)
+    # Material Object markers: M.O. 1, MO-1, etc.
+    text = re.sub(r'\(?\bM\.?O\.?[\s\.\-]*\d+\b\)?', ' ', text, flags=re.IGNORECASE)
+    
+    # Remove repeated title if provided
+    if title:
+        # Escape title for regex
+        escaped_title = re.escape(title)
+        # Match title potentially followed by "on [Date]"
+        # Date pattern: "on 27 July, 2006" or "on July 27, 2006"
+        date_pattern = r'(?:\s+on\s+\d+\s+\w+,\s+\d{4})?'
+        full_title_pattern = escaped_title + date_pattern
+        text = re.sub(full_title_pattern, ' ', text, flags=re.IGNORECASE)
+
     # Normalize spaces
     text = re.sub(r' +', ' ', text)
     
@@ -130,7 +152,7 @@ def clean_item(item):
     item["title"] = title
     
     # Clean Judgment
-    item["judgment"] = clean_judgment(item.get("judgment", ""))
+    item["judgment"] = clean_judgment(item.get("judgment", ""), title=title)
     
     # Clean and Extract IPC Sections
     ipc_sections = item.get("ipc_sections", [])
