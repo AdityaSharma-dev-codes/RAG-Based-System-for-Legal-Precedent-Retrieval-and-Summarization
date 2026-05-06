@@ -65,8 +65,9 @@ def main():
     for i, res in enumerate(results):
         print(f"\nResult {i+1} (Score: {res['score']:.4f}):")
         print(f"Title: {res['title']}")
-        print(f"IPC Sections: {', '.join(res['ipc_sections'])}")
-        print(f"Chunk: {res['chunk'][:200]}...")
+        if res.get('ipc_sections'):
+            print(f"Relevant IPC: {', '.join(res['ipc_sections'])}")
+        print(f"Chunk: {res['chunk'][:300]}...")
 
 if __name__ == "__main__":
     main()
