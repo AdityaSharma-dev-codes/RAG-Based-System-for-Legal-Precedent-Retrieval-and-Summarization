@@ -12,6 +12,7 @@ DataSet/
 
 # Cleaned Data
 *.json
+*.faiss
 
 # Distribution / packaging
 .Python

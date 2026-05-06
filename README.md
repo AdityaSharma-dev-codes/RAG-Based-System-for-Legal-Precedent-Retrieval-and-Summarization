@@ -76,6 +76,27 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
    - **Missing Data Check (test.py)**: Counts missing values in `title`, `judgment`, and `ipc_sections` for both original and cleaned datasets.
    - **Word Count Statistics (test.py)**: Calculates the average, minimum, and maximum word counts in the `judgment` section.
    - **Chunk Validation (test_chunks.py)**: Verifies that no chunk in `Chunked_criminal_cases.json` exceeds the 300-word limit and provides chunk-level statistics.
+<br><br>
+
+5. **Vectorization**: To generate embeddings and build the search index:
+   ```bash
+   python vectorize.py
+   ```
+   This script:
+   - **SBERT Embeddings**: Uses the `all-MiniLM-L6-v2` model to convert text chunks into 384-dimensional dense vectors.
+   - **FAISS Indexing**: Builds a high-performance vector index using Cosine Similarity (via `IndexFlatIP` and L2 normalization).
+   - **Batch Processing**: Optimized to handle 120k+ chunks in minutes.
+<br><br>
+
+6. **Search**: To query the legal precedent retrieval system:
+   ```bash
+   python query_system.py
+   ```
+   This system features:
+   - **Semantic Retrieval**: Finds relevant case chunks based on legal queries rather than just keywords.
+   - **Similarity Scoring**: Returns results with confidence scores based on cosine similarity.
+   - **IPC-Aware Results**: Automatically highlights relevant IPC sections associated with the retrieved legal precedents.
+   - **Result Filtering**: Includes a configurable similarity threshold to filter out weak matches.
 
 ### Team Members
 - Aditya Sharma (Team Lead)  
