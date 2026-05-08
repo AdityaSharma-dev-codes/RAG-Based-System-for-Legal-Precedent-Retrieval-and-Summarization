@@ -89,10 +89,22 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 <br><br>
 
 6. **RAG (Retrieval-Augmented Generation)**: To get answers based on retrieved legal chunks:
-   ```bash
-   export GOOGLE_API_KEY="your_api_key_here"
-   python query_system.py
-   ```
+    
+   1. **Setup Environment**:
+      Create a `.env` file in the root directory (you can use `.env-example` as a template):
+      ```bash
+      cp .env-example .env
+      ```
+      Open `.env` and add your Google Gemini API Key:
+      ```text
+      GOOGLE_API_KEY="your_api_key_here"
+      ```
+
+   2. **Run Query System**:
+      ```bash
+      python query_system.py
+      ```
+    
    This system features:
    - **Semantic Retrieval**: Finds relevant case chunks based on legal queries rather than just keywords.
    - **LLM-Generated Answers**: Uses Google Gemini (via `google-generativeai`) to explain retrieved legal contexts and answer queries.
