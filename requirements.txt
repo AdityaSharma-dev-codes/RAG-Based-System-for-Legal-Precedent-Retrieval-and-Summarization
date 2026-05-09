@@ -5,3 +5,5 @@ numpy
 scikit-learn
 tqdm
 spacy
+google-generativeai
+python-dotenv
