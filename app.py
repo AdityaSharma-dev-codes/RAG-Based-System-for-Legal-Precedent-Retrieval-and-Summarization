@@ -135,7 +135,6 @@ def render_sidebar():
         - **Retrieval**: FAISS
         - **Embeddings**: SentenceTransformers
         - **LLM**: Google Gemini
-        - **Orchestration**: LangChain & Custom Pipeline
         """)
         
         st.markdown("### 👥 Team")

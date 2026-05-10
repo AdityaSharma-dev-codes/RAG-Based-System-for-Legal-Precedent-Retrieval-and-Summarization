@@ -1,6 +1,5 @@
 # RAG-Based System for Legal Precedent Retrieval and Summarization
 
-> **Work in Progress:** This project is under active development and some features may be incomplete or unstable.  
 > **Academic Project:** This is a major college project and a team effort.
 
 A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling semantic search and LLM-generated summaries of relevant legal precedents from the Indian Supreme Court.
@@ -9,6 +8,7 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 
 - **Semantic Search**: Retrieve legal cases based on case context and legal principles.
 - **Automated Summarization**: Generate concise summaries for complex legal documents.
+- **Web Interface**: User-friendly Streamlit dashboard for easy case retrieval and analysis.
 - **Document Processing**: Automated text extraction and classification from case PDFs.
 - **Indian Judiciary Focus**: Specifically designed to handle the nuances of Indian legal documents (e.g., IPC, CrPC).
 
@@ -20,6 +20,9 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
 - `chunk_judgments.py`: Script to divide long judgment texts into manageable chunks for processing.
 - `test.py`: Validation script to verify data quality and track missing information.
 - `test_chunks.py`: Validation script to ensure chunked data meets word count constraints.
+- `vectorize.py`: Script to generate SBERT embeddings and build the FAISS vector index.
+- `query_system.py`: Backend RAG logic for semantic retrieval and LLM answer generation.
+- `app.py`: Streamlit-based web application for the interactive legal search interface.
 - `LICENSE`: MIT License.
 - `criminal_cases.json`: Initial extracted text from the DataSet.
 - `Cleaned_criminal_cases.json`: Final cleaned and enriched JSON dataset.
@@ -100,7 +103,17 @@ A Retrieval-Augmented Generation (RAG) system for the Indian judiciary, enabling
       GOOGLE_API_KEY="your_api_key_here"
       ```
 
-   2. **Run Query System**:
+   3. **Run Streamlit Web Application**:
+      ```bash
+      streamlit run app.py
+      ```
+      The web interface provides:
+      - **Interactive Querying**: Type your case details or legal questions.
+      - **AI Summarization**: Get instant explanations of relevant precedents.
+      - **Persistence**: Results stay visible even while exploring individual case cards.
+      - **Example Queries**: Quick access to common legal search patterns.
+
+   4. **Command-Line Query System** (Optional):
       ```bash
       python query_system.py
       ```
