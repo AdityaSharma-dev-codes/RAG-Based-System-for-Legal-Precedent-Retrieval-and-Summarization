@@ -30,7 +30,7 @@ class LegalQuerySystem:
             print("Warning: GOOGLE_API_KEY not found. RAG functionality will be limited.")
             self.llm_available = False
             
-    def search(self, query, k=5, threshold=0.5):
+    def search(self, query, k=5, threshold=0.3):
         # 1. Generate query embedding
         query_vector = self.model.encode([query]).astype('float32')
         
@@ -109,7 +109,7 @@ def main():
     
     query = "What is the punishment for murder under IPC 302?"
     print(f"\nQuery: {query}")
-    results = qs.search(query, k=3, threshold=0.4)
+    results = qs.search(query, k=3, threshold=0.3)
     
     # 1. Show retrieved chunks
     print("\n--- RETRIEVED CHUNKS ---")

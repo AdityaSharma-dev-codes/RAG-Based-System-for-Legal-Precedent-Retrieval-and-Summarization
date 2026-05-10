@@ -135,22 +135,13 @@ def render_sidebar():
         - **Retrieval**: FAISS
         - **Embeddings**: SentenceTransformers
         - **LLM**: Google Gemini
-        - **Orchestration**: LangChain & Custom Pipeline
         """)
         
         st.markdown("### 👥 Team")
         st.markdown("""
-        - **Developer 1**
-        - **Developer 2**
-        - **Developer 3**
-        """)
-        
-        st.markdown("### 🚀 Future Scope")
-        st.markdown("""
-        - Multilingual Support
-        - Legal Draft Generation
-        - Integration with Court APIs
-        - Case Timeline Visualization
+        - **Aditya Sharma**
+        - **Alvin Mike Jerad**
+        - **Aswin**
         """)
 
 def main():
@@ -208,6 +199,7 @@ def main():
     
     # Process Query
     if search_clicked and query:
+        st.session_state.last_query = query
         st.markdown("---")
         st.markdown("### 🤖 Analysis & Results")
         
@@ -215,6 +207,7 @@ def main():
         start_time = time.time()
         with st.spinner("Retrieving relevant precedents from vector database..."):
             results = qs.search(query, k=k_results, threshold=0.3)
+            st.session_state.results = results
         retrieval_time = time.time() - start_time
             
         if not results:
@@ -223,35 +216,41 @@ def main():
             # Generate AI Answer Phase
             with st.spinner("Generating concise legal summary using LLM..."):
                 answer = qs.generate_answer(query, results)
+                st.session_state.answer = answer
                 
             # Display Metrics
             m1, m2, m3 = st.columns(3)
             m1.metric("Precedents Found", len(results))
             m2.metric("Retrieval Time", f"{retrieval_time:.2f}s")
             m3.metric("Top Relevance", f"{(results[0]['score']*100):.1f}%" if results else "N/A")
-                
-            # Display AI Summary
-            st.markdown("#### 📝 AI-Generated Summary")
-            st.markdown(f"<div class='summary-box'>{answer}</div>", unsafe_allow_html=True)
             
-            # Display Retrieved Cases
-            st.markdown("#### 📚 Retrieved Legal Precedents")
+    # Always display results if they exist in session state
+    if 'results' in st.session_state and st.session_state.results:
+        results = st.session_state.results
+        answer = st.session_state.get('answer', "No summary generated.")
+        
+        # Display AI Summary
+        st.markdown("#### 📝 AI-Generated Summary")
+        st.markdown(f"<div class='summary-box'>{answer}</div>", unsafe_allow_html=True)
+        
+        # Display Retrieved Cases
+        st.markdown("#### 📚 Retrieved Legal Precedents")
+        
+        for i, res in enumerate(results):
+            score_pct = res['score'] * 100
             
-            for i, res in enumerate(results):
-                score_pct = res['score'] * 100
+            # Expandable card for each judgment
+            with st.expander(f"📄 {res.get('title', 'Unknown Case')} (Relevance: {score_pct:.1f}%)"):
+                st.markdown("**Key Details:**")
+                details_cols = st.columns(2)
+                with details_cols[0]:
+                    if 'ipc_sections' in res and res['ipc_sections']:
+                        st.write(f"**IPC Sections:** {', '.join(res['ipc_sections'])}")
                 
-                # Expandable card for each judgment
-                with st.expander(f"📄 {res.get('title', 'Unknown Case')} (Relevance: {score_pct:.1f}%)"):
-                    st.markdown("**Key Details:**")
-                    details_cols = st.columns(2)
-                    with details_cols[0]:
-                        if 'ipc_sections' in res and res['ipc_sections']:
-                            st.write(f"**IPC Sections:** {', '.join(res['ipc_sections'])}")
-                    
-                    st.markdown("**Relevant Judgment Snippet:**")
-                    st.info(res.get('chunk', 'No snippet available.'))
-                    
-                    st.caption(f"Cosine Similarity Score: {res.get('score', 0):.4f}")
+                st.markdown("**Relevant Judgment Snippet:**")
+                st.info(res.get('chunk', 'No snippet available.'))
+                
+                st.caption(f"Cosine Similarity Score: {res.get('score', 0):.4f}")
 
     # Footer
     st.markdown(
